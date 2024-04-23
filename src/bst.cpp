@@ -1,5 +1,5 @@
 #include "bst.h"
-
+#include <stdexcept>
 
 template <typename T>
 size_t BinarySearchTree<T>::size() const {
@@ -8,6 +8,13 @@ size_t BinarySearchTree<T>::size() const {
 
 template <typename T>
 BinarySearchTree<T>::Node &BinarySearchTree<T>::at(size_t index) {
+    if(index >= this->size()) throw std::out_of_range(
+                "Provided index for 'at' (" +
+                std::to_string(index) +
+                ") is out of range (" +
+                this->size() +
+                ")"
+        );
     return this->tree_container.at(index);
 }
 
@@ -37,23 +44,23 @@ void BinarySearchTree<T>::Node::update_indexes(size_t deleted_index) {
 
 template<typename T>
 BinarySearchTree<T>::Node *BinarySearchTree<T>::Node::left() {
-    if(this->left_index >= p_bst->size()) {
-        throw std::exception();
-    }
     return &this->p_bst->at(this->left_index);
 }
 
 template<typename T>
 BinarySearchTree<T>::Node *BinarySearchTree<T>::Node::right() {
-    if(this->node_index >= p_bst->size()) {
-        throw std::exception();
-    }
     return &this->p_bst->at(this->right_index);
 }
 
 template<typename T>
 void BinarySearchTree<T>::pop(size_t index) {
-    if(index >= this->size()) throw std::exception();
+    if(index >= this->size()) throw std::out_of_range(
+            "Provided index for 'pop' (" +
+            std::to_string(index) +
+            ") is out of range (" +
+            this->size() +
+            ")"
+            );
     for(size_t i = index + 1; i < this->size(); i++) {
         this->at(i).update_indexes(index);
     }
