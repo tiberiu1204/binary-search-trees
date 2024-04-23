@@ -1,3 +1,0 @@
-F:/Workspace/Facultate/SD/binary-search-trees/cmake-build-debug/CMakeFiles/binary_search_trees.dir
-F:/Workspace/Facultate/SD/binary-search-trees/cmake-build-debug/CMakeFiles/edit_cache.dir
-F:/Workspace/Facultate/SD/binary-search-trees/cmake-build-debug/CMakeFiles/rebuild_cache.dir
