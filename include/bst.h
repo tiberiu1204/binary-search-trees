@@ -6,14 +6,14 @@
 template <typename T>
 class BinarySearchTree {
 public:
+    BinarySearchTree() = default;
+    explicit BinarySearchTree(std::vector<T> values);
     virtual void insert(T value) = 0;
     virtual void remove(T value) = 0;
-    virtual void find(T value) = 0;
-    virtual void traverse() = 0;
+    virtual bool find(T value) = 0;
     [[nodiscard]] size_t size() const;
     virtual ~BinarySearchTree() = default;
 protected:
-    class Node;
     class Node {
     public:
         Node(size_t node_index, T value, BinarySearchTree *p_bst, size_t left_index = 0, size_t right_index = 0);
@@ -21,6 +21,9 @@ protected:
         Node *right();
         void update_indexes(size_t deleted_index);
         [[nodiscard]] size_t get_node_index() const;
+        [[nodiscard]] size_t get_left_index() const;
+        [[nodiscard]] size_t get_right_index() const;
+        [[nodiscard]] T get_value() const;
     private:
         BinarySearchTree *p_bst;
         size_t node_index;

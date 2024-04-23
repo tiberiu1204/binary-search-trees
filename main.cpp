@@ -1,7 +1,6 @@
 #include <iostream>
-#include "bst.h"
+#include "scapegoat.h"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+
 }

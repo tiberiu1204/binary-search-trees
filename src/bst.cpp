@@ -18,6 +18,13 @@ BinarySearchTree<T>::Node &BinarySearchTree<T>::at(size_t index) {
     return this->tree_container.at(index);
 }
 
+template <typename T>
+BinarySearchTree<T>::BinarySearchTree(std::vector<T> values) {
+    for(const auto &value : values) {
+        this->insert(value);
+    }
+}
+
 template<typename T>
 BinarySearchTree<T>::Node::Node(
         size_t node_index,
@@ -31,6 +38,21 @@ BinarySearchTree<T>::Node::Node(
 template<typename T>
 size_t BinarySearchTree<T>::Node::get_node_index() const {
     return this->node_index;
+}
+
+template<typename T>
+size_t BinarySearchTree<T>::Node::get_left_index() const {
+    return this->left_index;
+}
+
+template<typename T>
+size_t BinarySearchTree<T>::Node::get_right_index() const {
+    return this->right_index;
+}
+
+template<typename T>
+T BinarySearchTree<T>::Node::get_value() const {
+    return this->value;
 }
 
 template<typename T>
