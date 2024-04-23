@@ -17,12 +17,14 @@ protected:
     class Node {
     public:
         Node(size_t node_index, T value, BinarySearchTree *p_bst, size_t left_index = 0, size_t right_index = 0);
-        Node *left();
-        Node *right();
+        Node &left();
+        Node &right();
         void update_indexes(size_t deleted_index);
         [[nodiscard]] size_t get_node_index() const;
         [[nodiscard]] size_t get_left_index() const;
         [[nodiscard]] size_t get_right_index() const;
+        void set_left_index(size_t index);
+        void set_right_index(size_t index);
         [[nodiscard]] T get_value() const;
     private:
         BinarySearchTree *p_bst;
@@ -34,7 +36,7 @@ protected:
 protected:
     Node &at(size_t index);
     void pop(size_t index);
-    void pop(Node *node);
+    void pop(const Node &node);
     void push(const Node &node);
     Node create_node(size_t node_index, T value, size_t left_index = 0, size_t right_index = 0);
     void emplace(size_t node_index, T value, size_t left_index = 0, size_t right_index = 0);

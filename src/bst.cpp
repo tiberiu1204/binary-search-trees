@@ -63,15 +63,24 @@ void BinarySearchTree<T>::Node::update_indexes(size_t deleted_index) {
     if(right_index > deleted_index) right_index--;
     if(right_index == deleted_index) right_index = 0;
 }
-
 template<typename T>
-BinarySearchTree<T>::Node *BinarySearchTree<T>::Node::left() {
-    return &this->p_bst->at(this->left_index);
+void BinarySearchTree<T>::Node::set_left_index(size_t index) {
+    this->left_index = index;
 }
 
 template<typename T>
-BinarySearchTree<T>::Node *BinarySearchTree<T>::Node::right() {
-    return &this->p_bst->at(this->right_index);
+void BinarySearchTree<T>::Node::set_right_index(size_t index) {
+    this->right_index = index;
+}
+
+template<typename T>
+BinarySearchTree<T>::Node &BinarySearchTree<T>::Node::left() {
+    return this->p_bst->at(this->left_index);
+}
+
+template<typename T>
+BinarySearchTree<T>::Node &BinarySearchTree<T>::Node::right() {
+    return this->p_bst->at(this->right_index);
 }
 
 template<typename T>
@@ -89,7 +98,7 @@ void BinarySearchTree<T>::pop(size_t index) {
 }
 
 template<typename T>
-void BinarySearchTree<T>::pop(Node *node) {
+void BinarySearchTree<T>::pop(const Node &node) {
     size_t index = node->get_node_index();
     for(size_t i = index + 1; i < this->size(); i++) {
         this->at(i).update_indexes(index);
@@ -113,3 +122,4 @@ template<typename T>
 void BinarySearchTree<T>::emplace(size_t node_index, T value, size_t left_index, size_t right_index) {
     this->tree_container.emplace_back(node_index, value, this, left_index, right_index);
 }
+

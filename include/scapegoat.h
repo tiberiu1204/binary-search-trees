@@ -3,6 +3,8 @@
 
 #include "bst.h"
 
+class DuplicateElement : std::exception {};
+
 template <typename T>
 class ScapegoatTree : public BinarySearchTree<T> {
 public:

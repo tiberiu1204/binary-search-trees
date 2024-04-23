@@ -24,7 +24,30 @@ bool ScapegoatTree<T>::find(T value) {
 
 template <typename T>
 void ScapegoatTree<T>::insert(T value) {
-
+    if(this->size() == 0) {
+        this->emplace(0, value);
+        return;
+    }
+    size_t index = 0;
+    size_t tree_size = this->size();
+    while(true) {
+        Node &node = this->at(index);
+        if(value < node.get_value()) {
+            index = node.get_right_index();
+            if(index == 0) {
+                this->emplace(tree_size, value);
+                node.set_left_index(tree_size);
+            }
+        }
+        else if(value > node.get_value()) {
+            index = node.get_left_index();
+            if(index == 0) {
+                this->emplace(tree_size, value);
+                node.set_right_index(tree_size);
+            }
+        }
+        else throw DuplicateElement();
+    }
 }
 
 template <typename T>
