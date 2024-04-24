@@ -23,20 +23,20 @@ bool ScapegoatTree<T>::find(const T &value) const {
 
 template <typename T>
 void ScapegoatTree<T>::insert(const T &value) {
-    if(this->size() == 0) {
+    if(this->empty()) {
         this->emplace(value);
         return;
     }
 
-    std::stack<size_t> path = this->insert_value(value);
-    if(path.empty()) return;
-    Node &scapegoat = this->find_scapegoat(path);
+    size_t height = this->insert_value(value);
+    if(this->is_height_balanced(height)) return;
+    Node &scapegoat = this->find_scapegoat();
 }
 
 template <typename T>
-std::stack<size_t> ScapegoatTree<T>::insert_value(const T &value) {
+size_t ScapegoatTree<T>::insert_value(const T &value) {
     size_t tree_size = this->size();
-    Node &node = this->at(0);
+    Node &node = this->root();
     size_t height = 0;
     std::stack<size_t> path;
 
@@ -62,34 +62,26 @@ std::stack<size_t> ScapegoatTree<T>::insert_value(const T &value) {
         else throw DuplicateElement();
     }
 
-    if(this->is_height_balanced()) return {};
-    else return path;
+    return node;
 }
 
 template <typename T>
-ScapegoatTree<T>::Node &ScapegoatTree<T>::find_scapegoat(std::stack<size_t> &path) {
+ScapegoatTree<T>::Node &ScapegoatTree<T>::find_scapegoat() {
     size_t child_size = 1;
-    size_t child_index = this->size();
+    Node &child = this->back();
+    Node &node = child.parent();
     while(true) {
-        const Node &node = this->at(path.top());
-        path.pop();
-
         size_t node_size = child_size + 1;
-        size_t sibling_index = 0;
         size_t sibling_size = 0;
-
-        if(node.get_left_index() == child_index) sibling_index = node.get_right_index();
-        else sibling_index = node.get_left_index();
-        if(sibling_index != 0) {
-            sibling_size = this->size(sibling_index);
-        }
+        if(child.has_sibling()) sibling_size = this->size(child.sibling());
         node_size += sibling_size;
 
         if(child_size > this->alpha * node_size || sibling_size > this->alpha * node_size) {
             return node;
         }
-        child_index = node.get_node_index();
+        child = node;
         child_size = node_size;
+        node = node.parent();
     }
 }
 
@@ -101,9 +93,9 @@ inline bool ScapegoatTree<T>::is_height_balanced(size_t height) {
 
 template <typename T>
 ScapegoatTree<T>::Node *ScapegoatTree<T>::lookup(const T &value) const {
-    if(this -> size() == 0) return false;
+    if(this->empty()) return false;
     std::stack<size_t> s;
-    s.push(0);
+    s.push(this->root().get_node_index());
     while(!s.empty()) {
         size_t index = s.top();
         s.pop();

@@ -4,19 +4,19 @@
 
 template <typename T>
 size_t BinarySearchTree<T>::size() const {
-    return this->tree_container.size();
+    return this->tree_container.size() - 1;
 }
 
 template <typename T>
 BinarySearchTree<T>::Node &BinarySearchTree<T>::at(size_t index) const {
-    if(index >= this->size()) throw std::out_of_range(
+    if(index > this->size()) throw std::out_of_range(
                 "Provided index for 'at' (" +
                 std::to_string(index) +
                 ") is out of range (" +
                 this->size() +
                 ")"
         );
-    return this->tree_container.at(index);
+    return this->tree_container.at(index + 1);
 }
 
 template <typename T>
@@ -286,4 +286,26 @@ BinarySearchTree<T>::Node &BinarySearchTree<T>::find_max() {
 template <typename T>
 BinarySearchTree<T>::Node &BinarySearchTree<T>::root() const {
     return this->at(1);
+}
+
+template <typename T>
+BinarySearchTree<T>::Node &BinarySearchTree<T>::back() const {
+    return this->at(this->size());
+}
+
+template <typename T>
+bool BinarySearchTree<T>::empty() const {
+    return this->size() == 0;
+}
+
+template <typename T>
+bool BinarySearchTree<T>::Node::has_sibling() const {
+    if(this->is_left_sibling()) return this->parent().right_index != 0;
+    else return this->parent().left_index != 0;
+}
+
+template <typename T>
+BinarySearchTree<T>::Node &BinarySearchTree<T>::Node::sibling() const {
+    if(this->is_left_sibling()) return this->parent().right();
+    else return this->parent().left();
 }

@@ -52,11 +52,13 @@ protected:
         Node &left() const;
         Node &right() const;
         Node &parent() const;
+        Node &sibling() const;
         void insert_child(const Node &child, bool left);
         [[nodiscard]] bool is_left_sibling() const;
         [[nodiscard]] bool is_right_sibling() const;
         [[nodiscard]] bool has_left() const;
         [[nodiscard]] bool has_right() const;
+        [[nodiscard]] bool has_sibling() const;
         void update_indexes(size_t deleted_index);
         [[nodiscard]] size_t get_node_index() const;
         [[nodiscard]] size_t get_left_index() const;
@@ -76,6 +78,8 @@ protected:
     };
 protected:
     Node &at(size_t index) const;
+    Node &back() const;
+    bool empty() const;
     size_t size(const Node &node) const;
     [[nodiscard]] size_t size(size_t index) const;
     Node &root() const;

@@ -20,8 +20,8 @@ private:
     double alpha;
 private:
     inline bool is_height_balanced(size_t height);
-    std::stack<size_t> insert_value(const T &value);
-    Node &find_scapegoat(std::stack<size_t> &path);
+    size_t insert_value(const T &value);
+    Node &find_scapegoat();
     Node *lookup(const T &value) const;
 };
 
