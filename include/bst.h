@@ -8,17 +8,19 @@ class BinarySearchTree {
 public:
     BinarySearchTree() = default;
     explicit BinarySearchTree(std::vector<T> values);
-    virtual void insert(T value) = 0;
-    virtual void remove(T value) = 0;
-    virtual bool find(T value) = 0;
+    virtual void insert(const T &value) = 0;
+    virtual void remove(const T &value) = 0;
+    virtual bool find(const T &value) = 0;
     [[nodiscard]] size_t size() const;
     virtual ~BinarySearchTree() = default;
 protected:
     class Node {
     public:
-        Node(size_t node_index, T value, BinarySearchTree *p_bst, size_t left_index = 0, size_t right_index = 0);
+        Node(size_t node_index, const T &value, BinarySearchTree *p_bst, size_t left_index = 0, size_t right_index = 0);
         Node &left();
         Node &right();
+        bool has_left();
+        bool has_right();
         void update_indexes(size_t deleted_index);
         [[nodiscard]] size_t get_node_index() const;
         [[nodiscard]] size_t get_left_index() const;
@@ -38,8 +40,8 @@ protected:
     void pop(size_t index);
     void pop(const Node &node);
     void push(const Node &node);
-    Node create_node(size_t node_index, T value, size_t left_index = 0, size_t right_index = 0);
-    void emplace(size_t node_index, T value, size_t left_index = 0, size_t right_index = 0);
+    Node create_node(size_t node_index, const T &value, size_t left_index = 0, size_t right_index = 0);
+    void emplace(size_t node_index, const T &value, size_t left_index = 0, size_t right_index = 0);
 private:
     std::vector<Node> tree_container;
 };

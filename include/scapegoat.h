@@ -8,14 +8,18 @@ class DuplicateElement : std::exception {};
 template <typename T>
 class ScapegoatTree : public BinarySearchTree<T> {
 public:
-    ScapegoatTree() = default;
-    explicit ScapegoatTree(std::vector<T> values);
-    void insert(T value) override;
-    void remove(T value) override;
-    bool find(T value) override;
+    using Node = BinarySearchTree<T>::Node;
+    explicit ScapegoatTree(double alpha = 0.5);
+    explicit ScapegoatTree(std::vector<T> values, double alpha = 0.5);
+    void insert(const T &value) override;
+    void remove(const T &value) override;
+    bool find(const T &value) override;
 
 private:
-    using Node = BinarySearchTree<T>::Node;
+    double alpha{};
+private:
+    inline bool is_height_balanced(size_t height);
+    Node *lookup(const T &value);
 };
 
 #endif //BINARY_SEARCH_TREES_SCAPEGOAT_H

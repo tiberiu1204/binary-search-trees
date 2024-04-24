@@ -28,7 +28,8 @@ BinarySearchTree<T>::BinarySearchTree(std::vector<T> values) {
 template<typename T>
 BinarySearchTree<T>::Node::Node(
         size_t node_index,
-        T value, BinarySearchTree *p_bst,
+        const T &value,
+        BinarySearchTree *p_bst,
         size_t left_index,
         size_t right_index) :
         node_index(node_index), value(value), left_index(left_index), right_index(right_index), p_bst(p_bst) {
@@ -79,6 +80,16 @@ BinarySearchTree<T>::Node &BinarySearchTree<T>::Node::left() {
 }
 
 template<typename T>
+bool BinarySearchTree<T>::Node::has_left() {
+    return this->left_index != 0;
+}
+
+template<typename T>
+bool BinarySearchTree<T>::Node::has_right() {
+    return this->right_index != 0;
+}
+
+template<typename T>
 BinarySearchTree<T>::Node &BinarySearchTree<T>::Node::right() {
     return this->p_bst->at(this->right_index);
 }
@@ -113,13 +124,14 @@ void BinarySearchTree<T>::push(const Node &node) {
 template<typename T>
 BinarySearchTree<T>::Node BinarySearchTree<T>::create_node(
         size_t node_index,
-        T value, size_t left_index,
+        const T &value,
+        size_t left_index,
         size_t right_index) {
     return Node(node_index, value, this, left_index, right_index);
 }
 
 template<typename T>
-void BinarySearchTree<T>::emplace(size_t node_index, T value, size_t left_index, size_t right_index) {
+void BinarySearchTree<T>::emplace(size_t node_index, const T &value, size_t left_index, size_t right_index) {
     this->tree_container.emplace_back(node_index, value, this, left_index, right_index);
 }
 
