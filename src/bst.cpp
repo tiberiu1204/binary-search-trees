@@ -189,6 +189,9 @@ void BinarySearchTree<T>::pop(const Node &node) {
 template<typename T>
 void BinarySearchTree<T>::push(const Node &node) {
     tree_container.push_back(node);
+    if(this->size() == 0) {
+        this->tree_container.at(0).insert_child(this->back(), true);
+    }
 }
 
 template<typename T>
@@ -204,6 +207,9 @@ BinarySearchTree<T>::Node BinarySearchTree<T>::create_node(
 template <typename T>
 void BinarySearchTree<T>::emplace(const T &value, size_t parent_index, size_t left_index, size_t right_index) {
     this->tree_container.emplace_back(this->size(), parent_index, value, this, left_index, right_index);
+    if(this->size == 0) {
+        this->tree_container.at(0).insert_child(this->back(), true);
+    }
 }
 
 template <typename T>
@@ -213,19 +219,57 @@ template <typename T>
 BinarySearchTree<T>::Node &BinarySearchTree<T>::iterator::find_next_node() {
     Node &node_it = this->node;
     if(node_it.has_right()) {
-        while(node.has_left()) node_it = node_it.left();
+        node_it = node_it.right();
+        while(node_it.has_left()) node_it = node_it.left();
+        return node_it;
     }
-    else {
-        while(!node_it.parent().is_left_sibling()) {
-            node_it = node_it.parent();
-            if(node_it.node_index == 0) break;
+
+    Node &temp = node_it;
+    node_it = node_it.parent();
+    if(node_it == 0) return node_it;
+    while(!node_it.is_left_sibling()) {
+        node_it = node_it.parent();
+    }
+
+    if(temp.is_right_sibling()) {
+        if(node_it.node_index == 1) return node_it.parent();
+        node_it = node_it.right();
+        while(node_it.has_left()) {
+            node_it = node_it.left();
         }
     }
     return node_it;
 }
 
 template <typename T>
-BinarySearchTree<T>::iterator &BinarySearchTree<T>::iterator::operator++() {
+BinarySearchTree<T>::Node &BinarySearchTree<T>::iterator::find_prev_node() {
+    Node &node_it = this->node;
+    if(node_it.has_left()) {
+        node_it = node_it.left();
+        while(node_it.has_right()) node_it = node_it.right();
+        return node_it;
+    }
+
+    Node &temp = node_it;
+    node_it = node_it.parent();
+    if(node_it.node_index == 0) return temp;
+    while(!node_it.is_right_sibling()) {
+        node_it = node_it.parent();
+        if(node_it.node_index == 1) break;
+    }
+
+    if(temp.is_left_sibling()) {
+        if(node_it.node_index == 1) return temp;
+        node_it = node_it.left();
+        while(node_it.has_right()) {
+            node_it = node_it.right();
+        }
+    }
+    return node_it;
+}
+
+template <typename T>
+BinarySearchTree<T>::iterator &BinarySearchTree<T>::iterator::operator++() const{
     this->node = this->find_next_node();
     return *this;
 }
@@ -251,6 +295,47 @@ bool BinarySearchTree<T>::iterator::operator==(const iterator &other) const {
 template <typename T>
 bool BinarySearchTree<T>::iterator::operator!=(const iterator &other) const {
     return this->node.node_index != other.node.node_index;
+}
+
+template <typename T>
+BinarySearchTree<T>::iterator &BinarySearchTree<T>::iterator::operator--() const {
+    this->node = this->find_prev_node();
+    return *this;
+}
+
+template <typename T>
+BinarySearchTree<T>::iterator BinarySearchTree<T>::iterator::operator--(int) const {
+    iterator temp = *this;
+    this->node = this->find_prev_node();
+    return temp;
+}
+
+template <typename T>
+BinarySearchTree<T>::iterator BinarySearchTree<T>::iterator::operator+(int n) const {
+    iterator temp = *this;
+    int sign = n > 0 ? 1 : -1;
+    n = n > 0 ? n : -n;
+    while(n--) {
+        if(sign > 0) ++temp;
+        else --temp;
+    }
+    return temp;
+}
+
+template <typename T>
+BinarySearchTree<T>::iterator BinarySearchTree<T>::iterator::operator-(int n) const {
+    return *this + -n;
+}
+
+template <typename T>
+BinarySearchTree<T>::iterator &BinarySearchTree<T>::iterator::operator+=(int n) const {
+    *this = *this + n;
+    return *this;
+}
+
+template <typename T>
+BinarySearchTree<T>::iterator &BinarySearchTree<T>::iterator::operator-=(int n) const {
+    return *this += -n;
 }
 
 template <typename T>

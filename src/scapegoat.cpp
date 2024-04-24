@@ -31,6 +31,29 @@ void ScapegoatTree<T>::insert(const T &value) {
     size_t height = this->insert_value(value);
     if(this->is_height_balanced(height)) return;
     Node &scapegoat = this->find_scapegoat();
+
+    size_t start = this->find_min_in_subtree().get_node_index();
+    size_t finish = this->find_min_in_subtree().get_node_index();
+    iterator mid(this->begin() + (start + finish) / 2);
+    size_t mid_left = (start + finish) / 2, mid_right = mid_left + 1;
+
+    for(size_t i = 0; i < this->size(); i++) {
+
+    }
+}
+
+template <typename T>
+ScapegoatTree<T>::Node &ScapegoatTree<T>::find_min_in_subtree(const Node &root) {
+    Node &node = root;
+    while(node.has_left()) node = node.left();
+    return node;
+}
+
+template <typename T>
+ScapegoatTree<T>::Node &ScapegoatTree<T>::find_max_in_subtree(const Node &root) {
+    Node &node = root;
+    while(node.has_right()) node = node.right();
+    return node;
 }
 
 template <typename T>

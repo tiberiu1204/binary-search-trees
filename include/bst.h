@@ -25,8 +25,14 @@ public:
         using PointerType = DataType*;
         using RefType = DataType&;
 
-        iterator &operator++();
+        iterator &operator++() const;
         iterator operator++(int) const;
+        iterator &operator--() const;
+        iterator operator--(int) const;
+        iterator operator+(int n) const;
+        iterator operator-(int n) const;
+        iterator &operator+=(int n) const;
+        iterator &operator-=(int n) const;
         RefType operator*() const;
         bool operator==(const iterator &other) const;
         bool operator!=(const iterator &other) const;
@@ -37,6 +43,7 @@ public:
         PointerType ptr;
     private:
         Node &find_next_node();
+        Node &find_prev_node();
     };
 protected:
     class Node {
