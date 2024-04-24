@@ -8,4 +8,5 @@ add_executable(binary_search_trees main.cpp
         src/bst.cpp
         include/bst.h
         include/scapegoat.h
-        src/scapegoat.cpp)
+        src/scapegoat.cpp
+)
