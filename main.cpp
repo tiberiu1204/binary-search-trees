@@ -8,4 +8,8 @@ int main() {
     for(auto elem : scapegoat_tree) {
         std::cout<<elem<<" ";
     }
+    std::cout<<"\n";
+    for(auto it = scapegoat_tree.end() - 1; it >= scapegoat_tree.begin(); it--) {
+        std::cout<<*it<<" ";
+    }
 }

@@ -76,7 +76,7 @@ void ScapegoatTree<T>::rebuild_subtree(Node &root) {
     std::vector<T> sorted_values;
 
     auto begin = restricted_iterator(this->find_min_in_subtree(root));
-    auto end = ++restricted_iterator(this->find_max_in_subtree(root));
+    auto end = restricted_iterator(this->find_max_in_subtree(root)) + 1;
     for(auto it = begin; it != end; it++) {
         sorted_nodes.push_back(&it.get_node());
         sorted_values.push_back(*it);

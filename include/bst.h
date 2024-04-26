@@ -41,8 +41,6 @@ public:
         Iterator &operator++();
         Iterator operator++(int);
 
-        // TODO: fix --
-
         Iterator &operator--();
         Iterator operator--(int);
         Iterator operator+(int n) const;
@@ -52,6 +50,10 @@ public:
         RefType operator*() const;
         bool operator==(const Iterator &other) const;
         bool operator!=(const Iterator &other) const;
+        bool operator<(const Iterator &other) const;
+        bool operator<=(const Iterator &other) const;
+        bool operator>(const Iterator &other) const;
+        bool operator>=(const Iterator &other) const;
 
         explicit Iterator(Node &node);
     protected:
@@ -96,6 +98,7 @@ protected:
         void set_parent_index(size_t index);
         void set_value(const T &index);
         [[nodiscard]] T get_value() const;
+        [[nodiscard]] bool is_dummy_node() const;
     private:
         BinarySearchTree *p_bst;
         size_t node_index;
@@ -384,26 +387,23 @@ template <typename T>
 typename BinarySearchTree<T>::Node &BinarySearchTree<T>::iterator::find_prev_node() {
     Node *node_it = this->node;
     if(node_it->has_left()) {
-        node_it = node_it->left();
-        while(node_it->has_right()) node_it = node_it->right();
+        node_it = &node_it->left();
+        while(node_it->has_right()) node_it = &node_it->right();
         return *node_it;
     }
 
     Node *temp = node_it;
-    node_it = node_it->parent();
-    if(node_it->node_index == 0) return *temp;
-    while(!node_it->is_right_sibling()) {
-        node_it = node_it->parent();
-        if(node_it->node_index == 1) break;
-    }
+    node_it = &node_it->parent();
+    if(node_it->get_node_index() == 0) return *node_it;
+    if(temp->is_right_sibling()) return *node_it;
 
-    if(temp->is_left_sibling()) {
-        if(node_it->node_index == 1) return *temp;
-        node_it = node_it->left();
-        while(node_it->has_right()) {
-            node_it = node_it->right();
-        }
+    while(!node_it->is_right_sibling()) {
+        node_it = &node_it->parent();
+        if(node_it->get_node_index() == 0) return *node_it;
     }
+    node_it = &node_it->parent();
+    if(node_it->get_node_index() == 0) return *node_it;
+
     return *node_it;
 }
 
@@ -586,5 +586,32 @@ typename BinarySearchTree<T>::Node &BinarySearchTree<T>::Node::sibling() {
     else return this->parent().left();
 }
 
+template <typename T>
+bool BinarySearchTree<T>::iterator::operator<(const Iterator &other) const {
+    if(other.node->is_dummy_node() && !this->node->is_dummy_node()) return true;
+    return *this->ptr < *other.ptr;
+}
+
+template <typename T>
+bool BinarySearchTree<T>::iterator::operator<=(const Iterator &other) const {
+    if(this->node->is_dummy_node() && other.node->is_dummy_node()) return false;
+    return *this->ptr <= *other.ptr;
+}
+
+template <typename T>
+bool BinarySearchTree<T>::iterator::operator>(const Iterator &other) const {
+    return *this->ptr > *other.ptr;
+}
+
+template <typename T>
+bool BinarySearchTree<T>::iterator::operator>=(const Iterator &other) const {
+    if(this->node->is_dummy_node()) return false;
+    return *this->ptr >= *other.ptr;
+}
+
+template <typename T>
+bool BinarySearchTree<T>::Node::is_dummy_node() const {
+    return this->node_index == 0;
+}
 
 #endif //BINARY_SEARCH_TREES_BST_H
