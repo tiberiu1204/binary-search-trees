@@ -5,8 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 include_directories(include)
 
 add_executable(binary_search_trees main.cpp
-        src/bst.cpp
         include/bst.h
         include/scapegoat.h
-        src/scapegoat.cpp
 )

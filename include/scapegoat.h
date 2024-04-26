@@ -75,8 +75,9 @@ void ScapegoatTree<T>::rebuild_subtree(Node &root) {
     std::vector<Node *> sorted_nodes;
     std::vector<T> sorted_values;
 
-    Node &min_in_subtree = this->find_min_in_subtree(root);
-    for(auto it = restricted_iterator(min_in_subtree); it != this->end(); it++) {
+    auto begin = restricted_iterator(this->find_min_in_subtree(root));
+    auto end = ++restricted_iterator(this->find_max_in_subtree(root));
+    for(auto it = begin; it != end; it++) {
         sorted_nodes.push_back(&it.get_node());
         sorted_values.push_back(*it);
     }
@@ -179,7 +180,7 @@ template <typename T>
 inline bool ScapegoatTree<T>::is_height_balanced(size_t height) {
     size_t tree_size = this->size();
     double log_one_over_alpha = std::log(tree_size) / std::log(1 / this->alpha);
-    int result = std::floor(log_one_over_alpha) + 1;
+    int result = static_cast<int>(std::floor(log_one_over_alpha)) + 1;
     return height <= result;
 }
 
