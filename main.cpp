@@ -9,6 +9,10 @@ int main() {
         std::cout<<elem<<" ";
     }
     std::cout<<"\n";
+    scapegoat_tree.remove(6545);
+    scapegoat_tree.remove(0);
+    scapegoat_tree.remove(20);
+    scapegoat_tree.remove(11);
     for(auto it = scapegoat_tree.end() - 1; it >= scapegoat_tree.begin(); it--) {
         std::cout<<*it<<" ";
     }

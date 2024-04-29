@@ -6,27 +6,24 @@
 #include <cmath>
 #include <tuple>
 
-class DuplicateElement : std::exception {};
-
 template <typename T>
 class ScapegoatTree : public BinarySearchTree<T> {
 public:
     using iterator = typename ScapegoatTree<T>::iterator;
     explicit ScapegoatTree(double alpha = 0.5);
     explicit ScapegoatTree(std::vector<T> values, double alpha = 0.5);
-    void insert(const T &value) override;
+    iterator insert(const T &value) override;
     void remove(const T &value) override;
-    bool find(const T &value) const override;
 
 private:
     using Node = typename BinarySearchTree<T>::Node;
     using restricted_iterator = typename BinarySearchTree<T>::restricted_iterator;
     double alpha;
+    size_t max_node_count = 0;
 private:
     inline bool is_height_balanced(size_t height);
     size_t insert_value(const T &value);
     Node &find_scapegoat();
-    const Node *lookup(const T &value) const;
     Node &find_min_in_subtree(Node &root);
     Node &find_max_in_subtree(Node &root);
     void rebuild_subtree(Node &root);
@@ -50,21 +47,18 @@ ScapegoatTree<T>::ScapegoatTree(double alpha) {
 }
 
 template <typename T>
-bool ScapegoatTree<T>::find(const T &value) const {
-    return this->lookup(value) != nullptr;
-}
-
-template <typename T>
-void ScapegoatTree<T>::insert(const T &value) {
+ScapegoatTree<T>::iterator ScapegoatTree<T>::insert(const T &value) {
     if(this->empty()) {
         this->emplace(value);
-        return;
+        return this->begin();
     }
 
     size_t height = this->insert_value(value);
-    if(this->is_height_balanced(height)) return;
+    if(this->is_height_balanced(height)) return iterator(this->back());
 
     this->rebuild_subtree(this->find_scapegoat());
+    this->max_node_count = std::max(this->max_node_count, this->size());
+    return this->find(value);
 }
 
 template <typename T>
@@ -185,27 +179,13 @@ inline bool ScapegoatTree<T>::is_height_balanced(size_t height) {
 }
 
 template <typename T>
-const typename ScapegoatTree<T>::Node *ScapegoatTree<T>::lookup(const T &value) const {
-    if(this->empty()) return nullptr;
-    std::stack<size_t> s;
-    s.push(this->root().get_node_index());
-    while(!s.empty()) {
-        size_t index = s.top();
-        s.pop();
-
-        const Node *node = &this->at(index);
-
-        if(node->get_value() == value) return node;
-        else if(value < node->get_value()) s.push(node->get_right_index());
-        else s.push(node->get_left_index());
-    }
-    return nullptr;
-}
-
-template <typename T>
 void ScapegoatTree<T>::remove(const T &value) {
-    Node &node = this->find_node_by_value(value);
-    if(!node.has_left() && !node.has_right()) this->pop(node);
+    BinarySearchTree<T>::remove(value);
+    restricted_iterator it = this->lookup(value);
+    if(this->size() <= this->alpha * this->max_node_count) {
+        this->rebuild_subtree(this->root());
+        this->max_node_count = this->size();
+    }
 }
 
 template class ScapegoatTree<int>;

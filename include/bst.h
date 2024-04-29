@@ -5,6 +5,8 @@
 #include <vector>
 #include <stack>
 
+class DuplicateElement : std::exception {};
+
 class TreeEmptyException : std::exception {
 public:
     explicit TreeEmptyException(std::string instruction = "") : instruction(std::move(instruction)) {
@@ -25,9 +27,9 @@ public:
     class Iterator;
     using iterator = Iterator;
     BinarySearchTree();
-    virtual void insert(const T &value) = 0;
-    virtual void remove(const T &value) = 0;
-    virtual bool find(const T &value) const = 0;
+    virtual iterator insert(const T &value);
+    virtual void remove(const T &value);
+    virtual iterator find(const T &value);
     [[nodiscard]] size_t size() const;
     virtual ~BinarySearchTree() = default;
     virtual iterator begin();
@@ -99,7 +101,7 @@ protected:
         void set_parent_index(size_t index);
         void set_value(const T &index);
         [[nodiscard]] T get_value() const;
-        [[nodiscard]] bool is_dummy_node() const;
+        [[nodiscard]] bool is_end_node() const;
     private:
         BinarySearchTree *p_bst;
         size_t node_index;
@@ -121,8 +123,7 @@ protected:
     Node &at(size_t index);
     const Node &back() const;
     Node &back();
-    const Node &find_node_by_value(const T &value) const;
-    Node &find_node_by_value(const T &value);
+    restricted_iterator lookup(const T &value);
     [[nodiscard]] bool empty() const;
     size_t size(const Node &node) const;
     [[nodiscard]] size_t size(size_t index) const;
@@ -142,23 +143,87 @@ private:
     std::vector<Node> tree_container;
 private:
     Node &find_min();
-    Node &find_max();
 };
 
 template<typename T>
-const BinarySearchTree<T>::Node &BinarySearchTree<T>::find_node_by_value(const T &value) const {
-    const Node *node = &this->root();
-    while(node->get_value() != value) {
-        if(node->get_value() > value) node = &node->left();
-        else node = &node->right();
-        if(node->is_dummy_node()) return *node;
+void BinarySearchTree<T>::remove(const T &value) {
+    restricted_iterator it = this->lookup(value);
+    if(it == this->end()) return;
+    Node &node = it.get_node();
+    if(!node.has_left() && !node.has_right()) {
+        if(node.is_left_sibling()) node.parent().set_left_index(0);
+        else node.parent().set_right_index(0);
+        this->pop(node);
     }
-    return *node;
+    else if(!node.has_left()) {
+        node.set_value(node.right().get_value());
+        node.set_right_index(0);
+        this->pop(node.right());
+    }
+    else if(!node.has_right()) {
+        node.set_value(node.left().get_value());
+        node.set_left_index(0);
+        this->pop(node.left());
+    }
+    else {
+        it++;
+        Node &next = it.get_node();
+        node.set_value(next.get_value());
+        if(next.is_left_sibling()) next.parent().set_left_index(0);
+        else next.parent().set_right_index(0);
+        this->pop(next);
+    }
 }
 
 template<typename T>
-BinarySearchTree<T>::Node &BinarySearchTree<T>::find_node_by_value(const T &value) {
-    return const_cast<Node &>(this->find_node_by_value(value));
+BinarySearchTree<T>::iterator BinarySearchTree<T>::insert(const T &value) {
+    if(this->empty()) {
+        this->emplace(value);
+        return this->begin();
+    }
+
+    Node *node = &this->root();
+
+    while(true) {
+        if(value < node->get_value()) {
+            if(!node->has_left()) {
+                node->set_left_index(this->next_index());
+                this->emplace(value, node->get_node_index());
+                break;
+            }
+            node = &node->left();
+        }
+        else if(value > node->get_value()) {
+            if(!node->has_right()) {
+                node->set_right_index(this->next_index());
+                this->emplace(value, node->get_node_index());
+                break;
+            }
+            node = &node->right();
+        }
+        else throw DuplicateElement();
+    }
+
+    return iterator(this->back());
+}
+
+template<typename T>
+BinarySearchTree<T>::iterator BinarySearchTree<T>::find(const T &value) {
+    return this->lookup(value);
+}
+
+template<typename T>
+BinarySearchTree<T>::restricted_iterator BinarySearchTree<T>::lookup(const T &value) {
+    if(this->empty()) return restricted_iterator(this->at(0));
+
+    Node *node = &this->root();
+
+    while(node->get_value() != value) {
+        if(node->get_value() > value) node = &node->left();
+        else node = &node->right();
+        if(node->is_end_node()) return restricted_iterator(*node);
+    }
+    return restricted_iterator(*node);
 }
 
 template<typename T>
@@ -266,11 +331,10 @@ T BinarySearchTree<T>::Node::get_value() const {
 
 template<typename T>
 void BinarySearchTree<T>::Node::update_indexes(size_t deleted_index) {
-    this->node_index--;
+    if(this->node_index > deleted_index) this->node_index--;
     if(left_index > deleted_index) left_index--;
-    if(left_index == deleted_index) left_index = 0;
     if(right_index > deleted_index) right_index--;
-    if(right_index == deleted_index) right_index = 0;
+    if(parent_index > deleted_index) parent_index--;
 }
 
 template<typename T>
@@ -339,7 +403,7 @@ void BinarySearchTree<T>::pop(size_t index) {
                 this->size() +
                 ")"
         );
-    for(size_t i = index + 1; i < this->size(); i++) {
+    for(size_t i = 1; i <= this->size(); i++) {
         this->at(i).update_indexes(index);
     }
     this->tree_container.erase(this->tree_container.begin() + index);
@@ -348,7 +412,7 @@ void BinarySearchTree<T>::pop(size_t index) {
 template<typename T>
 void BinarySearchTree<T>::pop(const Node &node) {
     size_t index = node.get_node_index();
-    for(size_t i = index + 1; i < this->size(); i++) {
+    for(size_t i = 1; i <= this->size(); i++) {
         this->at(i).update_indexes(index);
     }
     this->tree_container.erase(this->tree_container.begin() + index);
@@ -507,7 +571,7 @@ typename BinarySearchTree<T>::iterator BinarySearchTree<T>::begin() {
 
 template <typename T>
 typename BinarySearchTree<T>::iterator BinarySearchTree<T>::end() {
-    return iterator(this->root().parent());
+    return iterator(this->at(0));
 }
 
 template <typename T>
@@ -517,16 +581,6 @@ typename BinarySearchTree<T>::Node &BinarySearchTree<T>::find_min() {
     while(true) {
         if(!node->has_left()) return *node;
         node = &node->left();
-    }
-}
-
-template <typename T>
-typename BinarySearchTree<T>::Node &BinarySearchTree<T>::find_max() {
-    if(this->size() == 0) throw std::exception();
-    Node *node = this->at(0);
-    while(true) {
-        if(!node->has_right()) return *node;
-        node = node->right();
     }
 }
 
@@ -607,13 +661,13 @@ typename BinarySearchTree<T>::Node &BinarySearchTree<T>::Node::sibling() {
 
 template <typename T>
 bool BinarySearchTree<T>::iterator::operator<(const Iterator &other) const {
-    if(other.node->is_dummy_node() && !this->node->is_dummy_node()) return true;
+    if(other.node->is_end_node() && !this->node->is_end_node()) return true;
     return *this->ptr < *other.ptr;
 }
 
 template <typename T>
 bool BinarySearchTree<T>::iterator::operator<=(const Iterator &other) const {
-    if(this->node->is_dummy_node() && other.node->is_dummy_node()) return false;
+    if(this->node->is_end_node() && other.node->is_end_node()) return false;
     return *this->ptr <= *other.ptr;
 }
 
@@ -624,12 +678,12 @@ bool BinarySearchTree<T>::iterator::operator>(const Iterator &other) const {
 
 template <typename T>
 bool BinarySearchTree<T>::iterator::operator>=(const Iterator &other) const {
-    if(this->node->is_dummy_node()) return false;
+    if(this->node->is_end_node()) return false;
     return *this->ptr >= *other.ptr;
 }
 
 template <typename T>
-bool BinarySearchTree<T>::Node::is_dummy_node() const {
+bool BinarySearchTree<T>::Node::is_end_node() const {
     return this->node_index == 0;
 }
 
