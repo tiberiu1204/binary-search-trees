@@ -1,12 +1,13 @@
 #ifndef BINARY_SEARCH_TREES_BST_H
 #define BINARY_SEARCH_TREES_BST_H
 
+#include <utility>
 #include <vector>
 #include <stack>
 
 class TreeEmptyException : std::exception {
 public:
-    TreeEmptyException(std::string instruction = "") : instruction(instruction) {
+    explicit TreeEmptyException(std::string instruction = "") : instruction(std::move(instruction)) {
         std::cerr<<"Tree is empty, cannot execute '" + this->instruction + "'\n";
     }
     const char* what() {
@@ -110,17 +111,19 @@ protected:
 protected:
     class RestrictedIterator : public Iterator {
     public:
-        RestrictedIterator(Node &node);
+        explicit RestrictedIterator(Node &node);
         Node &get_node();
     };
     using restricted_iterator = RestrictedIterator;
 protected:
-    size_t next_index() const;
+    [[nodiscard]] size_t next_index() const;
     const Node &at(size_t index) const;
     Node &at(size_t index);
     const Node &back() const;
     Node &back();
-    bool empty() const;
+    const Node &find_node_by_value(const T &value) const;
+    Node &find_node_by_value(const T &value);
+    [[nodiscard]] bool empty() const;
     size_t size(const Node &node) const;
     [[nodiscard]] size_t size(size_t index) const;
     const Node &root() const;
@@ -141,6 +144,22 @@ private:
     Node &find_min();
     Node &find_max();
 };
+
+template<typename T>
+const BinarySearchTree<T>::Node &BinarySearchTree<T>::find_node_by_value(const T &value) const {
+    const Node *node = &this->root();
+    while(node->get_value() != value) {
+        if(node->get_value() > value) node = &node->left();
+        else node = &node->right();
+        if(node->is_dummy_node()) return *node;
+    }
+    return *node;
+}
+
+template<typename T>
+BinarySearchTree<T>::Node &BinarySearchTree<T>::find_node_by_value(const T &value) {
+    return const_cast<Node &>(this->find_node_by_value(value));
+}
 
 template<typename T>
 size_t BinarySearchTree<T>::next_index() const {
@@ -328,7 +347,7 @@ void BinarySearchTree<T>::pop(size_t index) {
 
 template<typename T>
 void BinarySearchTree<T>::pop(const Node &node) {
-    size_t index = node->get_node_index();
+    size_t index = node.get_node_index();
     for(size_t i = index + 1; i < this->size(); i++) {
         this->at(i).update_indexes(index);
     }
@@ -361,7 +380,7 @@ void BinarySearchTree<T>::emplace(const T &value, size_t parent_index, size_t le
 }
 
 template <typename T>
-BinarySearchTree<T>::iterator::Iterator(BinarySearchTree<T>::Node &node) : ptr(&node.value), node(&node) {}
+BinarySearchTree<T>::Iterator::Iterator(BinarySearchTree<T>::Node &node) : ptr(&node.value), node(&node) {}
 
 template <typename T>
 typename BinarySearchTree<T>::Node &BinarySearchTree<T>::iterator::find_next_node() {
@@ -561,8 +580,8 @@ template <typename T>
 BinarySearchTree<T>::RestrictedIterator::RestrictedIterator(Node &node) : Iterator(node) {}
 
 template <typename T>
-void BinarySearchTree<T>::Node::set_value(const T &val) {
-    this->value = val;
+void BinarySearchTree<T>::Node::set_value(const T &index) {
+    this->value = index;
 }
 
 template <typename T>

@@ -204,7 +204,8 @@ const typename ScapegoatTree<T>::Node *ScapegoatTree<T>::lookup(const T &value) 
 
 template <typename T>
 void ScapegoatTree<T>::remove(const T &value) {
-
+    Node &node = this->find_node_by_value(value);
+    if(!node.has_left() && !node.has_right()) this->pop(node);
 }
 
 template class ScapegoatTree<int>;
