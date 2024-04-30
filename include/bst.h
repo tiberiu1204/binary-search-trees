@@ -157,13 +157,13 @@ void BinarySearchTree<T>::remove(const T &value) {
     }
     else if(!node.has_left()) {
         node.set_value(node.right().get_value());
-        node.set_right_index(0);
         this->pop(node.right());
+        node.set_right_index(0);
     }
     else if(!node.has_right()) {
         node.set_value(node.left().get_value());
-        node.set_left_index(0);
         this->pop(node.left());
+        node.set_left_index(0);
     }
     else {
         it++;
