@@ -7,4 +7,5 @@ include_directories(include)
 add_executable(binary_search_trees main.cpp
         include/bst.h
         include/scapegoat.h
+        include/avl.h
 )
