@@ -27,9 +27,9 @@ private:
 
     int balance_factor(Node &node);
 
-    Node &left_rotate(Node &node);
+    void left_rotate(Node &node);
 
-    Node &right_rotate(Node &node);
+    void right_rotate(Node &node);
 
     void balance(Node &node);
 };
@@ -40,37 +40,44 @@ void AVLTree<T>::balance(AVLTree::Node &node)
     Node *node_ptr = &node;
     while (node_ptr->get_parent_index() > 0) {
         if (balance_factor(*node_ptr) >= 2 and balance_factor(node_ptr->left()) >= 0)   // left - left
-            *node_ptr = right_rotate(*node_ptr);
-
+            right_rotate(*node_ptr);
         else if (balance_factor(*node_ptr) >= 2) {  // left - right
-            node_ptr->left() = left_rotate(node_ptr->left());
-            *node_ptr = right_rotate(*node_ptr);
+            left_rotate(node_ptr->left());
+            right_rotate(*node_ptr);
         } else if (balance_factor(*node_ptr) <= -2 and balance_factor(node_ptr->right()) <= 0)  // right - right
-            *node_ptr = left_rotate(*node_ptr);
-
+            left_rotate(*node_ptr);
         else if (balance_factor(*node_ptr) <= -2) {  // right - left
-            node_ptr->right() = right_rotate(node_ptr->right());
-            *node_ptr = left_rotate(*node_ptr);
-        } else node_ptr = &node_ptr->parent();
+            right_rotate(node_ptr->right());
+            left_rotate(*node_ptr);
+        }
+        node_ptr = &node_ptr->parent();
     }
 }
 
 template<typename T>
-AVLTree<T>::Node &AVLTree<T>::left_rotate(AVLTree::Node &node)
+void AVLTree<T>::left_rotate(AVLTree::Node &node)
 {
     Node &right_child = node.right();
     node.set_right_index(right_child.get_left_index());
+    right_child.left().set_parent_index(node.get_node_index());
     right_child.set_left_index(node.get_node_index());
-    return right_child;
+    right_child.set_parent_index(node.get_parent_index());
+    if (node.is_left_sibling()) right_child.parent().set_left_index(right_child.get_node_index());
+    else right_child.parent().set_right_index(right_child.get_node_index());
+    node.set_parent_index(right_child.get_node_index());
 }
 
 template<typename T>
-AVLTree<T>::Node &AVLTree<T>::right_rotate(AVLTree::Node &node)
+void AVLTree<T>::right_rotate(AVLTree::Node &node)
 {
     Node &left_child = node.left();
     node.set_left_index(left_child.get_right_index());
+    left_child.right().set_parent_index(node.get_node_index());
     left_child.set_right_index(node.get_node_index());
-    return left_child;
+    left_child.set_parent_index(node.get_parent_index());
+    if (node.is_left_sibling()) left_child.parent().set_left_index(left_child.get_node_index());
+    else left_child.parent().set_right_index(left_child.get_node_index());
+    node.set_parent_index(left_child.get_node_index());
 }
 
 template<typename T>
