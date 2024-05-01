@@ -115,15 +115,19 @@ void AVLTree<T>::remove(const T &value)
     if (!node.has_left() && !node.has_right()) {
         if (node.is_left_sibling()) node.parent().set_left_index(0);
         else node.parent().set_right_index(0);
+        Node &parent = node.parent();
         this->pop(node);
+        balance(parent);
     } else if (!node.has_left()) {
         node.set_value(node.right().get_value());
         this->pop(node.right());
         node.set_right_index(0);
+        balance(node);
     } else if (!node.has_right()) {
         node.set_value(node.left().get_value());
         this->pop(node.left());
         node.set_left_index(0);
+        balance(node);
     } else {
         it++;
         Node &next = it.get_node();
@@ -131,8 +135,9 @@ void AVLTree<T>::remove(const T &value)
         if (next.is_left_sibling()) next.parent().set_left_index(0);
         else next.parent().set_right_index(0);
         this->pop(next);
+        balance(node);
     }
-    balance(node);
+
 }
 
 template<typename T>
