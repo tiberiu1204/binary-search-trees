@@ -160,7 +160,7 @@ AVLTree<T>::iterator AVLTree<T>::insert(const T &value)
                 break;
             }
             node = &node->right();
-        }
+        } else throw DuplicateElement();
     }
     Node &new_node = this->back();
     balance(new_node);
