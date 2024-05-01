@@ -8,6 +8,7 @@
 
 #include "bst.h"
 #include <iostream>
+#include <unordered_map>
 
 template <typename T>
 class AVLTree : public BinarySearchTree<T> {
@@ -20,11 +21,8 @@ public:
 private:
     using Node = typename BinarySearchTree<T>::Node;
     using restricted_iterator = typename BinarySearchTree<T>::restricted_iterator;
+    std::unordered_map<int, int> heights;
 private:
-    int left_subtree_height(Node &node);
-
-    int right_subtree_height(Node &node);
-
     int balance_factor(Node &node);
 
     void left_rotate(Node &node);
@@ -32,13 +30,23 @@ private:
     void right_rotate(Node &node);
 
     void balance(Node &node);
+
+    void update_heights(Node &node);
 };
+
+template<typename T>
+void AVLTree<T>::update_heights(AVLTree::Node &node)
+{
+    heights[node.get_node_index()] = std::max(node.has_left() ? heights[node.get_left_index()] : 0,
+                                              node.has_right() ? heights[node.get_right_index()] : 0) + 1;
+}
 
 template<typename T>
 void AVLTree<T>::balance(AVLTree::Node &node)
 {
     Node *node_ptr = &node;
     while (node_ptr->get_parent_index() > 0) {
+        update_heights(*node_ptr);
         if (balance_factor(*node_ptr) >= 2 and balance_factor(node_ptr->left()) >= 0)   // left - left
             right_rotate(*node_ptr);
         else if (balance_factor(*node_ptr) >= 2) {  // left - right
@@ -65,6 +73,9 @@ void AVLTree<T>::left_rotate(AVLTree::Node &node)
     if (node.is_left_sibling()) right_child.parent().set_left_index(right_child.get_node_index());
     else right_child.parent().set_right_index(right_child.get_node_index());
     node.set_parent_index(right_child.get_node_index());
+
+    update_heights(node);
+    update_heights(right_child);
 }
 
 template<typename T>
@@ -78,32 +89,15 @@ void AVLTree<T>::right_rotate(AVLTree::Node &node)
     if (node.is_left_sibling()) left_child.parent().set_left_index(left_child.get_node_index());
     else left_child.parent().set_right_index(left_child.get_node_index());
     node.set_parent_index(left_child.get_node_index());
-}
 
-template<typename T>
-int AVLTree<T>::left_subtree_height(AVLTree::Node &node)
-{
-    Node &left = node.left();
-    if (!node.has_left()) return 0;
-    else {
-        return std::max(left_subtree_height(left), right_subtree_height(left)) + 1;
-    }
-}
-
-template<typename T>
-int AVLTree<T>::right_subtree_height(AVLTree::Node &node)
-{
-    Node &right = node.right();
-    if (!node.has_right()) return 0;
-    else {
-        return std::max(left_subtree_height(right), right_subtree_height(right)) + 1;
-    }
+    update_heights(node);
+    update_heights(left_child);
 }
 
 template<typename T>
 int AVLTree<T>::balance_factor(AVLTree::Node &node)
 {
-    return left_subtree_height(node) - right_subtree_height(node);
+    return heights[node.left().get_node_index()] - heights[node.right().get_node_index()];
 }
 
 template<typename T>
@@ -168,6 +162,7 @@ AVLTree<T>::iterator AVLTree<T>::insert(const T &value)
         } else throw DuplicateElement();
     }
     Node &new_node = this->back();
+    heights[new_node.get_node_index()] = 1;
     balance(new_node);
     return this->find(value);
 }
