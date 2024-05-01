@@ -4,6 +4,9 @@
 #include <utility>
 #include <vector>
 #include <stack>
+#include <string>
+#include <stdexcept>
+#include <iostream>
 
 class DuplicateElement : std::exception {};
 
@@ -30,6 +33,8 @@ public:
     virtual iterator insert(const T &value);
     virtual void remove(const T &value);
     virtual iterator find(const T &value);
+    iterator predecessor_find(const T &value);
+    iterator successor_find(const T &value);
     [[nodiscard]] size_t size() const;
     virtual ~BinarySearchTree() = default;
     virtual iterator begin();
@@ -685,6 +690,64 @@ bool BinarySearchTree<T>::iterator::operator>=(const Iterator &other) const {
 template <typename T>
 bool BinarySearchTree<T>::Node::is_end_node() const {
     return this->node_index == 0;
+}
+
+template <typename T>
+BinarySearchTree<T>::iterator BinarySearchTree<T>::successor_find(const T &value) {
+    if(this->empty()) return this->end();
+    Node *node = &this->root();
+    Node *potential = &this->at(0);
+    while(true) {
+        if(node->get_value() == value) break;
+        if(value > node->get_value()) {
+            if(!node->has_right()) {
+                break;
+            }
+            node = &node->right();
+        }
+        else if(value < node->get_value()) {
+            if(!node->has_left()) {
+                break;
+            }
+            node = &node->left();
+        }
+        if(node->get_value() >= value && (potential->get_value() > node->get_value() || potential->is_end_node())) {
+            potential = node;
+        }
+    }
+    if(node->get_value() >= value && (potential->get_value() > node->get_value() || potential->is_end_node())) {
+        potential = node;
+    }
+    return iterator(*potential);
+}
+
+template <typename T>
+BinarySearchTree<T>::iterator BinarySearchTree<T>::predecessor_find(const T &value) {
+    if(this->empty()) return this->end();
+    Node *node = &this->root();
+    Node *potential = &this->at(0);
+    while(true) {
+        if(node->get_value() == value) break;
+        if(value > node->get_value()) {
+            if(!node->has_right()) {
+                break;
+            }
+            node = &node->right();
+        }
+        else if(value < node->get_value()) {
+            if(!node->has_left()) {
+                break;
+            }
+            node = &node->left();
+        }
+        if(node->get_value() <= value && (potential->get_value() < node->get_value() || potential->is_end_node())) {
+            potential = node;
+        }
+    }
+    if(node->get_value() <= value && (potential->get_value() < node->get_value() || potential->is_end_node())) {
+        potential = node;
+    }
+    return iterator(*potential);
 }
 
 #endif //BINARY_SEARCH_TREES_BST_H
