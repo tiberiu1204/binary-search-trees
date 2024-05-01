@@ -97,7 +97,8 @@ void AVLTree<T>::right_rotate(AVLTree::Node &node)
 template<typename T>
 int AVLTree<T>::balance_factor(AVLTree::Node &node)
 {
-    return heights[node.left().get_node_index()] - heights[node.right().get_node_index()];
+    return (node.has_left() ? heights[node.left().get_node_index()] : 0) -
+           (node.has_right() ? heights[node.right().get_node_index()] : 0);
 }
 
 template<typename T>
