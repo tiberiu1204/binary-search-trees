@@ -102,6 +102,7 @@ protected:
         [[nodiscard]] size_t get_right_index() const;
         [[nodiscard]] size_t get_parent_index() const;
         void set_left_index(size_t index);
+        void set_node_index(size_t index);
         void set_right_index(size_t index);
         void set_parent_index(size_t index);
         void set_value(const T &index);
@@ -149,6 +150,11 @@ private:
 private:
     Node &find_min();
 };
+
+template<typename T>
+void BinarySearchTree<T>::Node::set_node_index(size_t index) {
+    this->node_index = index;
+}
 
 template<typename T>
 void BinarySearchTree<T>::remove(const T &value) {
@@ -386,12 +392,12 @@ const typename BinarySearchTree<T>::Node &BinarySearchTree<T>::Node::parent() co
 
 template<typename T>
 bool BinarySearchTree<T>::Node::is_left_sibling() const {
-    return this->parent().left().node_index == this->node_index;
+    return this->parent().left_index == this->node_index;
 }
 
 template<typename T>
 bool BinarySearchTree<T>::Node::is_right_sibling() const {
-    return this->parent().right().node_index == this->node_index;
+    return this->parent().right_index == this->node_index;
 }
 
 template<typename T>
@@ -401,26 +407,35 @@ const typename BinarySearchTree<T>::Node &BinarySearchTree<T>::Node::right() con
 
 template<typename T>
 void BinarySearchTree<T>::pop(size_t index) {
-    if(index >= this->size()) throw std::out_of_range(
-                "Provided index for 'pop' (" +
+    if(index > this->size()) throw std::out_of_range(
+                std::string("Provided index for 'pop' (") +
                 std::to_string(index) +
                 ") is out of range (" +
-                this->size() +
+                std::to_string(this->size()) +
                 ")"
         );
-    for(size_t i = 1; i <= this->size(); i++) {
-        this->at(i).update_indexes(index);
+//    for(size_t i = 1; i <= this->size(); i++) {
+//        this->at(i).update_indexes(index);
+//    }
+//    this->tree_container.erase(this->tree_container.begin() + index);
+    if(index == this->back().get_node_index()) {
+        this->tree_container.pop_back();
+        return;
     }
-    this->tree_container.erase(this->tree_container.begin() + index);
+    Node &node = this->at(index);
+    std::swap(node, this->back());
+    if(node.is_left_sibling()) node.parent().set_left_index(index);
+    else node.parent().set_right_index(index);
+    node.set_node_index(index);
+    if(node.has_left()) node.left().set_parent_index(index);
+    if(node.has_right()) node.right().set_parent_index(index);
+    this->tree_container.pop_back();
 }
 
 template<typename T>
 void BinarySearchTree<T>::pop(const Node &node) {
     size_t index = node.get_node_index();
-    for(size_t i = 1; i <= this->size(); i++) {
-        this->at(i).update_indexes(index);
-    }
-    this->tree_container.erase(this->tree_container.begin() + index);
+    this->pop(index);
 }
 
 template<typename T>
