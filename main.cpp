@@ -31,7 +31,7 @@ void test_trees(const std::vector<std::vector<int>> &vectors)
         std::cout << "AVL tree insertion time for " << vector.size() << " elements: " << time << std::endl;
 
         start = high_resolution_clock::now();
-        ScapegoatTree<int> sg_tree(vector);
+        ScapegoatTree<int> sg_tree(vector, 0.5);
         end = high_resolution_clock::now();
         time = duration_cast<milliseconds>(end - start);
         std::cout << "Scapegoat tree insertion time for " << vector.size() << " elements: " << time << std::endl;
@@ -40,7 +40,7 @@ void test_trees(const std::vector<std::vector<int>> &vectors)
 
         start = high_resolution_clock::now();
         for (size_t i = vector.size() - 1; i >= vector.size() - qty - 1; --i) {
-            avl_tree.find(vector.at(i));
+            if(*avl_tree.find(vector.at(i)) != vector.at(i)) throw std::exception();
         }
         end = high_resolution_clock::now();
         time = duration_cast<milliseconds>(end - start);
@@ -49,7 +49,7 @@ void test_trees(const std::vector<std::vector<int>> &vectors)
 
         start = high_resolution_clock::now();
         for (size_t i = vector.size() - 1; i >= vector.size() - qty - 1; --i) {
-            sg_tree.find(vector.at(i));
+            if(*sg_tree.find(vector.at(i)) != vector.at(i)) throw std::exception();
         }
         end = high_resolution_clock::now();
         time = duration_cast<milliseconds>(end - start);
@@ -58,7 +58,7 @@ void test_trees(const std::vector<std::vector<int>> &vectors)
 
         start = high_resolution_clock::now();
         for (size_t i = vector.size() - 1; i >= vector.size() - qty - 1; --i) {
-//            avl_tree.remove(vector.at(i));
+            avl_tree.remove(vector.at(i));
         }
         end = high_resolution_clock::now();
         time = duration_cast<milliseconds>(end - start);
@@ -73,25 +73,26 @@ void test_trees(const std::vector<std::vector<int>> &vectors)
         time = duration_cast<milliseconds>(end - start);
         std::cout << "Scapegoat tree removal time for " << vector.size() << " elements, " << qty << " removals: "
                   << time << std::endl;
+        std::cout<<"\n\n";
     }
 }
 
 int main() {
-    std::vector<int> sizes = {100000};
+    std::vector<int> sizes = {1000, 10000, 100000, 500000, 1000000};
     auto test_vectors = prepare_vectors(sizes);
     test_trees(test_vectors);
-//    std::vector<int> v = {8, 9, 0, 3, 4, 2, 6, 7, 5, 1};
-//    ScapegoatTree<int> tree(v, 0.5);
-//    for(auto elem : tree) {
-//        std::cout<<elem<<" ";
-//    }
-//    std::cout<<"\n";
-//    for(auto elem : v) {
-//        std::cout<<"Removing elem: "<<elem<<"\n";
-//        tree.remove(elem);
-//        for(auto tree_elem : tree) {
-//            std::cout<<tree_elem<<" ";
-//        }
-//        std::cout<<"\n";
-//    }
+
+    /*
+     * Descoperiri:
+     * - Scapegoat tree cu alpha 0.5 este mai bun decat AVL tree la toate capitolele pe test seturi <= 500000
+     * - AVL tree intrece Scapegoat la find() pe test caseuri cu >= 500000 elemente. Insa este de aprox. 2 ori mai
+     * incet la inserare si stergere decat un Scapegoat tree cu alpha 0.5
+     * - Un scapegoat tree cu alpha > 0.5 poate ajunge la timpi de inserare < 1s pentru 1000000 elemente, in timp ce AVL
+     * tree scoate o medie de 11 secunde.
+     * - Concluzii: AVL tree trebuie folosit atunci cand avem mai multa nevoie de a cauta elemente dintr-un set de date
+     * care nu se schimba deloc sau aproape deloc, si are cel putin 500000 de elemente, in timp ce Scapegoat tree
+     * este preferat in toate cazurile in care avem data seturi < 500000 de elemente sau data seturi dinamice, in care
+     * avem nevoie de multe operatii de inserare si stergere.
+     */
+
 }
