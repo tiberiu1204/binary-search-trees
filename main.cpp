@@ -31,7 +31,7 @@ void test_trees(const std::vector<std::vector<int>> &vectors)
         std::cout << "AVL tree insertion time for " << vector.size() << " elements: " << time << std::endl;
 
         start = high_resolution_clock::now();
-        ScapegoatTree<int> sg_tree(vector, 0.5);
+        ScapegoatTree<int> sg_tree(vector, .5);
         end = high_resolution_clock::now();
         time = duration_cast<milliseconds>(end - start);
         std::cout << "Scapegoat tree insertion time for " << vector.size() << " elements: " << time << std::endl;
@@ -85,10 +85,10 @@ int main() {
     /*
      * Descoperiri:
      * - Scapegoat tree cu alpha 0.5 este mai bun decat AVL tree la toate capitolele pe test seturi <= 500000
-     * - AVL tree intrece Scapegoat la find() pe test caseuri cu >= 500000 elemente. Insa este de aprox. 2 ori mai
+     * - AVL tree intrece Scapegoat la find() pe test caseuri cu >= 500000 elemente. Insa este de aprox. 1.5 - 2 ori mai
      * incet la inserare si stergere decat un Scapegoat tree cu alpha 0.5
-     * - Un scapegoat tree cu alpha > 0.5 poate ajunge la timpi de inserare < 1s pentru 1000000 elemente, in timp ce AVL
-     * tree scoate o medie de 11 secunde.
+     * - Un scapegoat tree cu alpha > 0.5 poate ajunge la timpi de inserare < 700ms pentru 1000000 elemente, in timp ce AVL
+     * tree scoate o medie de 3.1 secunde.
      * - Concluzii: AVL tree trebuie folosit atunci cand avem mai multa nevoie de a cauta elemente dintr-un set de date
      * care nu se schimba deloc sau aproape deloc, si are cel putin 500000 de elemente, in timp ce Scapegoat tree
      * este preferat in toate cazurile in care avem data seturi < 500000 de elemente sau data seturi dinamice, in care

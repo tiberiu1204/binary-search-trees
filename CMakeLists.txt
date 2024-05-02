@@ -9,3 +9,5 @@ add_executable(binary_search_trees main.cpp
         include/scapegoat.h
         include/avl.h
 )
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
