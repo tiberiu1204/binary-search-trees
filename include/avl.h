@@ -12,12 +12,6 @@
 
 template <typename T>
 class AVLTree : public BinarySearchTree<T> {
-public:
-    using iterator = typename AVLTree<T>::iterator;
-    AVLTree() = default;
-    explicit AVLTree(std::vector<T> values);
-    iterator insert(const T &value) override;
-    void remove(const T &value) override;
 private:
     using Node = typename BinarySearchTree<T>::Node;
     using restricted_iterator = typename BinarySearchTree<T>::restricted_iterator;
@@ -32,7 +26,26 @@ private:
     void balance(Node &node);
 
     void update_heights(Node &node);
+
+public:
+    using iterator = typename AVLTree<T>::iterator;
+
+    AVLTree() = default;
+
+    explicit AVLTree(std::vector<T> values);
+
+    iterator insert(const T &value) override;
+
+    void remove(const T &value) override;
+
+    bool check_balance();
 };
+
+template<typename T>
+bool AVLTree<T>::check_balance()
+{
+    return ((balance_factor(this->root()) < 2) && (balance_factor(this->root()) > -2));
+}
 
 template<typename T>
 void AVLTree<T>::update_heights(AVLTree::Node &node)
@@ -45,7 +58,7 @@ template<typename T>
 void AVLTree<T>::balance(AVLTree::Node &node)
 {
     Node *node_ptr = &node;
-    while (node_ptr->get_parent_index() > 0) {
+    while (!node_ptr->is_end_node()) {
         update_heights(*node_ptr);
         if (balance_factor(*node_ptr) >= 2 and balance_factor(node_ptr->left()) >= 0)   // left - left
             right_rotate(*node_ptr);
@@ -108,31 +121,39 @@ void AVLTree<T>::remove(const T &value)
     if (it == this->end()) return;
     Node &node = it.get_node();
     if (!node.has_left() && !node.has_right()) {
-        if (node.is_left_sibling()) node.parent().set_left_index(0);
-        else node.parent().set_right_index(0);
-        Node &parent = node.parent();
-        this->pop(node);
-        balance(parent);
-    } else if (!node.has_left()) {
-        node.set_value(node.right().get_value());
-        this->pop(node.right());
-        node.set_right_index(0);
-        balance(node);
-    } else if (!node.has_right()) {
-        node.set_value(node.left().get_value());
-        this->pop(node.left());
-        node.set_left_index(0);
-        balance(node);
-    } else {
-        it++;
-        Node &next = it.get_node();
-        node.set_value(next.get_value());
-        if (next.is_left_sibling()) next.parent().set_left_index(0);
-        else next.parent().set_right_index(0);
-        this->pop(next);
-        balance(node);
-    }
 
+        std::swap(heights[node.get_node_index()], heights[this->back().get_node_index()]);
+        this->remove_node_no_children(node);
+        Node &parent = node.parent();
+        balance(parent);
+    } else if (!node.has_left() || !node.has_right()) {
+
+        std::swap(heights[node.get_node_index()], heights[this->back().get_node_index()]);
+        this->remove_node_one_child(node);
+        Node &parent = node.parent();
+        balance(parent);
+    } else {
+        Node *current_node = &node;
+        while (true) {
+            it++;
+            Node &next = it.get_node();
+            current_node->set_value(next.get_value());
+            if (!next.has_right() && !next.has_left()) {
+                std::swap(heights[next.get_node_index()], heights[this->back().get_node_index()]);
+                this->remove_node_no_children(next);
+                Node &parent = next.parent();
+                balance(parent);
+                break;
+            } else if (!next.has_right() || !next.has_left()) {
+
+                std::swap(heights[next.get_node_index()], heights[this->back().get_node_index()]);
+                this->remove_node_one_child(next);
+                Node &parent = next.parent();
+                balance(parent);
+                break;
+            } else current_node = &next;
+        }
+    }
 }
 
 template<typename T>
