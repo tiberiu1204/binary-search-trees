@@ -58,7 +58,7 @@ void test_trees(const std::vector<std::vector<int>> &vectors)
 
         start = high_resolution_clock::now();
         for (size_t i = vector.size() - 1; i >= vector.size() - qty - 1; --i) {
-            avl_tree.remove(vector.at(i));
+//            avl_tree.remove(vector.at(i));
         }
         end = high_resolution_clock::now();
         time = duration_cast<milliseconds>(end - start);
@@ -77,7 +77,21 @@ void test_trees(const std::vector<std::vector<int>> &vectors)
 }
 
 int main() {
-    std::vector<int> sizes = {10000};
+    std::vector<int> sizes = {100000};
     auto test_vectors = prepare_vectors(sizes);
     test_trees(test_vectors);
+//    std::vector<int> v = {8, 9, 0, 3, 4, 2, 6, 7, 5, 1};
+//    ScapegoatTree<int> tree(v, 0.5);
+//    for(auto elem : tree) {
+//        std::cout<<elem<<" ";
+//    }
+//    std::cout<<"\n";
+//    for(auto elem : v) {
+//        std::cout<<"Removing elem: "<<elem<<"\n";
+//        tree.remove(elem);
+//        for(auto tree_elem : tree) {
+//            std::cout<<tree_elem<<" ";
+//        }
+//        std::cout<<"\n";
+//    }
 }

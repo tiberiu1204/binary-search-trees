@@ -181,7 +181,7 @@ inline bool ScapegoatTree<T>::is_height_balanced(size_t height) {
 template <typename T>
 void ScapegoatTree<T>::remove(const T &value) {
     BinarySearchTree<T>::remove(value);
-    if(this->size() <= this->alpha * this->max_node_count) {
+    if(this->size() <= this->alpha * this->max_node_count && this->size() > 0) {
         this->rebuild_subtree(this->root());
         this->rebuild_subtree(this->root());
         this->max_node_count = this->size();

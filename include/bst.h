@@ -145,11 +145,34 @@ protected:
             size_t left_index = 0,
             size_t right_index = 0) const;
     void emplace(const T &value, size_t parent_index = 0, size_t left_index = 0, size_t right_index = 0);
+    void remove_node_no_children(Node &node);
+    void remove_node_one_child(Node &node);
 private:
     std::vector<Node> tree_container;
 private:
     Node &find_min();
 };
+
+template<typename T>
+void BinarySearchTree<T>::remove_node_no_children(Node &node) {
+    if(node.is_left_sibling()) node.parent().set_left_index(0);
+    else node.parent().set_right_index(0);
+    this->pop(node);
+}
+
+template<typename T>
+void BinarySearchTree<T>::remove_node_one_child(Node &node) {
+    Node &parent = node.parent();
+    Node &child = node.has_right() ? node.right() : node.left();
+    if(node.is_right_sibling()) {
+        parent.set_right_index(child.get_node_index());
+    }
+    else {
+        parent.set_left_index(child.get_node_index());
+    }
+    child.set_parent_index(parent.get_node_index());
+    this->pop(node);
+}
 
 template<typename T>
 void BinarySearchTree<T>::Node::set_node_index(size_t index) {
@@ -162,27 +185,27 @@ void BinarySearchTree<T>::remove(const T &value) {
     if(it == this->end()) return;
     Node &node = it.get_node();
     if(!node.has_left() && !node.has_right()) {
-        if(node.is_left_sibling()) node.parent().set_left_index(0);
-        else node.parent().set_right_index(0);
-        this->pop(node);
+        this->remove_node_no_children(node);
     }
-    else if(!node.has_left()) {
-        node.set_value(node.right().get_value());
-        this->pop(node.right());
-        node.set_right_index(0);
-    }
-    else if(!node.has_right()) {
-        node.set_value(node.left().get_value());
-        this->pop(node.left());
-        node.set_left_index(0);
+    else if(!node.has_left() || !node.has_right()) {
+        this->remove_node_one_child(node);
     }
     else {
-        it++;
-        Node &next = it.get_node();
-        node.set_value(next.get_value());
-        if(next.is_left_sibling()) next.parent().set_left_index(0);
-        else next.parent().set_right_index(0);
-        this->pop(next);
+        Node *current_node = &node;
+        while(true) {
+            it++;
+            Node &next = it.get_node();
+            current_node->set_value(next.get_value());
+            if(!next.has_right() && !next.has_left()) {
+                this->remove_node_no_children(next);
+                break;
+            }
+            else if(!next.has_right() || !next.has_left()) {
+                this->remove_node_one_child(next);
+                break;
+            }
+            else current_node = &next;
+        }
     }
 }
 
@@ -596,7 +619,6 @@ typename BinarySearchTree<T>::iterator BinarySearchTree<T>::end() {
 
 template <typename T>
 typename BinarySearchTree<T>::Node &BinarySearchTree<T>::find_min() {
-    if(this->size() == 0) throw std::exception();
     Node *node = &this->at(0);
     while(true) {
         if(!node->has_left()) return *node;
@@ -607,13 +629,13 @@ typename BinarySearchTree<T>::Node &BinarySearchTree<T>::find_min() {
 template <typename T>
 const typename BinarySearchTree<T>::Node &BinarySearchTree<T>::root() const {
     if(this->empty()) throw TreeEmptyException("root");
-    return this->at(1);
+    return this->at(0).left();
 }
 
 template <typename T>
 typename BinarySearchTree<T>::Node &BinarySearchTree<T>::root() {
     if(this->empty()) throw TreeEmptyException("root");
-    return this->at(1);
+    return this->at(0).left();
 }
 
 template <typename T>
