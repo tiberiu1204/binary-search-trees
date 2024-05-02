@@ -736,6 +736,9 @@ BinarySearchTree<T>::iterator BinarySearchTree<T>::successor_find(const T &value
     Node *potential = &this->at(0);
     while(true) {
         if(node->get_value() == value) break;
+        if(node->get_value() >= value && (potential->get_value() > node->get_value() || potential->is_end_node())) {
+            potential = node;
+        }
         if(value > node->get_value()) {
             if(!node->has_right()) {
                 break;
@@ -747,9 +750,6 @@ BinarySearchTree<T>::iterator BinarySearchTree<T>::successor_find(const T &value
                 break;
             }
             node = &node->left();
-        }
-        if(node->get_value() >= value && (potential->get_value() > node->get_value() || potential->is_end_node())) {
-            potential = node;
         }
     }
     if(node->get_value() >= value && (potential->get_value() > node->get_value() || potential->is_end_node())) {
@@ -765,6 +765,9 @@ BinarySearchTree<T>::iterator BinarySearchTree<T>::predecessor_find(const T &val
     Node *potential = &this->at(0);
     while(true) {
         if(node->get_value() == value) break;
+        if(node->get_value() <= value && (potential->get_value() < node->get_value() || potential->is_end_node())) {
+            potential = node;
+        }
         if(value > node->get_value()) {
             if(!node->has_right()) {
                 break;
@@ -776,9 +779,6 @@ BinarySearchTree<T>::iterator BinarySearchTree<T>::predecessor_find(const T &val
                 break;
             }
             node = &node->left();
-        }
-        if(node->get_value() <= value && (potential->get_value() < node->get_value() || potential->is_end_node())) {
-            potential = node;
         }
     }
     if(node->get_value() <= value && (potential->get_value() < node->get_value() || potential->is_end_node())) {

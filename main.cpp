@@ -78,7 +78,7 @@ void test_trees(const std::vector<std::vector<int>> &vectors)
 }
 
 int main() {
-    std::vector<int> sizes = {1000, 10000, 100000, 500000, 1000000};
+    std::vector<int> sizes = {1000, 10000, 100000, 500000, 1000000, 10000000};
     auto test_vectors = prepare_vectors(sizes);
     test_trees(test_vectors);
 
@@ -94,5 +94,4 @@ int main() {
      * este preferat in toate cazurile in care avem data seturi < 500000 de elemente sau data seturi dinamice, in care
      * avem nevoie de multe operatii de inserare si stergere.
      */
-
 }
